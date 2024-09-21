@@ -30,12 +30,12 @@ def test_info():
     # Vérifie que la réponse contient des informations personnelles
     json_data = response.json()
     assert "SK_ID_CURR" in json_data
-    assert "EXT_SOURCE_2" in json_data  # Exemples de champs possibles
+    assert "INCOME_PER_PERSON" in json_data
 
 # Test du point de terminaison /distribution
 def test_distribution():
     url = f"{BASE_URL}/distribution"
-    data = {"SK_ID_CURR": 100004, "feature": "EXT_SOURCE_2"}
+    data = {"SK_ID_CURR": 100004, "feature": "INCOME_PER_PERSON"}
     response = requests.post(url, json=data)
 
     # Vérifie que la requête est réussie
