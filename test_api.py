@@ -7,7 +7,7 @@ BASE_URL = "https://p7-ocr-api-mathis-d22bcf66c298.herokuapp.com"
 def test_predict():
     url = f"{BASE_URL}/predict"
     # Exemple de données pour l'API
-    data = {"SK_ID_CURR": 100001}
+    data = {"SK_ID_CURR": 100004}
     response = requests.post(url, json=data)
     
     # Vérifie que la requête est réussie
@@ -21,7 +21,7 @@ def test_predict():
 # Test du point de terminaison /info
 def test_info():
     url = f"{BASE_URL}/info"
-    data = {"SK_ID_CURR": 100001}
+    data = {"SK_ID_CURR": 100004}
     response = requests.post(url, json=data)
 
     # Vérifie que la requête est réussie
@@ -35,7 +35,7 @@ def test_info():
 # Test du point de terminaison /distribution
 def test_distribution():
     url = f"{BASE_URL}/distribution"
-    data = {"SK_ID_CURR": 100001, "feature": "EXT_SOURCE_2"}
+    data = {"SK_ID_CURR": 100004, "feature": "EXT_SOURCE_2"}
     response = requests.post(url, json=data)
 
     # Vérifie que la requête est réussie
