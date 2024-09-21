@@ -20,12 +20,14 @@ jobs:
         with:
           python-version: '3.12.4'
 
-      - name: Install dependencies
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
-          source venv/bin/activate
+          source venv/bin/activate  # Activation de l'environnement virtuel
           pip install -r requirements.txt
-          pip install pytest requests
+          pip install pytest
 
       - name: Run API tests
-        run: pytest test_api.py
+        run: |
+          source venv/bin/activate  # Assure que venv est activé avant pytest
+          pytest test_api.py
