@@ -22,18 +22,21 @@ personal_info_df = pd.read_csv(info_path)
 
 @app.route("/predict", methods=['POST'])
 def predict():
-        """
-    Prédit la probabilité d'un événement pour un échantillon basé sur un identifiant fourni.
+    """
+    Prédit la probabilité d'un événement pour un échantillon basé sur un identifiant fourni, et calcule
+    les valeurs SHAP pour interpréter la prédiction.
 
     Cette fonction reçoit une requête POST avec un identifiant unique (`SK_ID_CURR`) au format JSON.
     Elle recherche l'échantillon correspondant dans un DataFrame, puis utilise un modèle de machine learning
-    pour prédire la probabilité d'une seconde classe (par exemple, un événement spécifique). 
+    pour prédire la probabilité de la classe positive (par exemple, le risque de non-remboursement).
+    Elle calcule également les valeurs SHAP pour interpréter l'impact de chaque caractéristique sur la prédiction.
 
     Si l'échantillon correspondant n'est pas trouvé dans le DataFrame, la fonction renvoie un message d'erreur.
 
     Returns:
         flask.Response: Un objet JSON contenant :
-            - `probability` (float) : La probabilité prédite pour la seconde classe.
+            - `probability` (float) : La probabilité prédite pour la classe positive (par exemple, le risque de non-remboursement).
+            - `shap_values` (list) : Les valeurs SHAP pour chaque caractéristique, expliquant leur impact sur la prédiction.
             - `feature_names` (list) : La liste des noms de caractéristiques utilisées pour la prédiction.
             - `feature_values` (list) : La liste des valeurs des caractéristiques de l'échantillon.
         En cas d'erreur (si `SK_ID_CURR` n'est pas trouvé), un message d'erreur est renvoyé avec un code de statut 400.
@@ -41,6 +44,7 @@ def predict():
     Raises:
         KeyError: Si `SK_ID_CURR` n'est pas présent dans les données de la requête JSON.
     """
+
     data = request.json
     sk_id_curr = data['SK_ID_CURR']
 
@@ -54,13 +58,24 @@ def predict():
     # Supprimer la colonne ID et TARGET pour la prédiction
     sample = sample.drop(columns=['SK_ID_CURR', 'TARGET'])
 
-    # Prédire
-    prediction = model.predict_proba(sample)
-    proba = prediction[0][1]  # Probabilité de la seconde classe
+    # Appliquer le scaler
+    sample_scaled = scaler.transform(sample)
 
-    # Retourner la probabilité
+    # Prédire le score de crédit
+    prediction = model.predict_proba(sample_scaled)
+    proba = prediction[0][1]  # Probabilité pour la classe positive
+
+    # Calculer les valeurs SHAP pour l'échantillon
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(sample_scaled)
+
+    # Récupérer les valeurs SHAP pour la classe 1
+    shap_values_ind = shap_values[1][0]
+
+    # Retourner la probabilité, les valeurs SHAP et les noms des features
     return jsonify({
         'probability': proba * 100,
+        'shap_values': shap_values_ind.tolist(),
         'feature_names': sample.columns.tolist(),
         'feature_values': sample.values[0].tolist()
     })
