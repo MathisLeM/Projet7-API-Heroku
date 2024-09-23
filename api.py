@@ -82,7 +82,7 @@ def predict():
 
 @app.route("/info", methods=['POST'])
 def info():
-        """
+    """
     Récupère les informations personnelles associées à un identifiant unique.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) au format JSON.
