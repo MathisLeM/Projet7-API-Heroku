@@ -121,7 +121,7 @@ def info():
 
 @app.route("/distribution", methods=['POST'])
 def distribution():
-        """
+    """
     Récupère la distribution d'une caractéristique spécifique et la valeur associée à un client donné.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) et une caractéristique (`feature`) au format JSON.
