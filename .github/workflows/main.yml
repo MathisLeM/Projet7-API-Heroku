@@ -30,4 +30,4 @@ jobs:
       - name: Run API tests
         run: |
           source venv/bin/activate  # Assure que venv est activé avant pytest
-          pytest test_api.py
+          pytest Tests_unitaires/test_api.py
