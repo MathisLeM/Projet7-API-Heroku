@@ -11,6 +11,8 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # Charger le modèle en dehors de la clause if __name__ == "__main__":
 model_path = os.path.join(current_directory, "saved_model_v3.pkl")
 model = joblib.load(model_path)
+scaler_path = os.path.join(current_directory, "scaler.pkl")
+scaler = joblib.load(scaler_path)
 
 # Charger les données de prédiction
 csv_path = os.path.join(current_directory, "df300.csv")
