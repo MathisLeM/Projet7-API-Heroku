@@ -1,7 +1,6 @@
 import os
 import joblib
 import pandas as pd
-import shap
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -12,8 +11,6 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # Charger le modèle en dehors de la clause if __name__ == "__main__":
 model_path = os.path.join(current_directory, "saved_model_v3.pkl")
 model = joblib.load(model_path)
-scaler_path = os.path.join(current_directory, "scaler.pkl")
-scaler = joblib.load(scaler_path)
 
 # Charger les données de prédiction
 csv_path = os.path.join(current_directory, "df300.csv")
@@ -25,21 +22,18 @@ personal_info_df = pd.read_csv(info_path)
 
 @app.route("/predict", methods=['POST'])
 def predict():
-    """
-    Prédit la probabilité d'un événement pour un échantillon basé sur un identifiant fourni, et calcule
-    les valeurs SHAP pour interpréter la prédiction.
+        """
+    Prédit la probabilité d'un événement pour un échantillon basé sur un identifiant fourni.
 
     Cette fonction reçoit une requête POST avec un identifiant unique (`SK_ID_CURR`) au format JSON.
     Elle recherche l'échantillon correspondant dans un DataFrame, puis utilise un modèle de machine learning
-    pour prédire la probabilité de la classe positive (par exemple, le risque de non-remboursement).
-    Elle calcule également les valeurs SHAP pour interpréter l'impact de chaque caractéristique sur la prédiction.
+    pour prédire la probabilité d'une seconde classe (par exemple, un événement spécifique). 
 
     Si l'échantillon correspondant n'est pas trouvé dans le DataFrame, la fonction renvoie un message d'erreur.
 
     Returns:
         flask.Response: Un objet JSON contenant :
-            - `probability` (float) : La probabilité prédite pour la classe positive (par exemple, le risque de non-remboursement).
-            - `shap_values` (list) : Les valeurs SHAP pour chaque caractéristique, expliquant leur impact sur la prédiction.
+            - `probability` (float) : La probabilité prédite pour la seconde classe.
             - `feature_names` (list) : La liste des noms de caractéristiques utilisées pour la prédiction.
             - `feature_values` (list) : La liste des valeurs des caractéristiques de l'échantillon.
         En cas d'erreur (si `SK_ID_CURR` n'est pas trouvé), un message d'erreur est renvoyé avec un code de statut 400.
@@ -47,7 +41,6 @@ def predict():
     Raises:
         KeyError: Si `SK_ID_CURR` n'est pas présent dans les données de la requête JSON.
     """
-
     data = request.json
     sk_id_curr = data['SK_ID_CURR']
 
@@ -61,31 +54,20 @@ def predict():
     # Supprimer la colonne ID et TARGET pour la prédiction
     sample = sample.drop(columns=['SK_ID_CURR', 'TARGET'])
 
-    # Appliquer le scaler
-    sample_scaled = scaler.transform(sample)
+    # Prédire
+    prediction = model.predict_proba(sample)
+    proba = prediction[0][1]  # Probabilité de la seconde classe
 
-    # Prédire le score de crédit
-    prediction = model.predict_proba(sample_scaled)
-    proba = prediction[0][1]  # Probabilité pour la classe positive
-
-    # Calculer les valeurs SHAP pour l'échantillon
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(sample_scaled)
-
-    # Récupérer les valeurs SHAP pour la classe 1
-    shap_values_ind = shap_values[1][0]
-
-    # Retourner la probabilité, les valeurs SHAP et les noms des features
+    # Retourner la probabilité
     return jsonify({
         'probability': proba * 100,
-        'shap_values': shap_values_ind.tolist(),
         'feature_names': sample.columns.tolist(),
         'feature_values': sample.values[0].tolist()
     })
 
 @app.route("/info", methods=['POST'])
 def info():
-    """
+        """
     Récupère les informations personnelles associées à un identifiant unique.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) au format JSON.
@@ -124,7 +106,7 @@ def info():
 
 @app.route("/distribution", methods=['POST'])
 def distribution():
-    """
+        """
     Récupère la distribution d'une caractéristique spécifique et la valeur associée à un client donné.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) et une caractéristique (`feature`) au format JSON.
