@@ -22,7 +22,7 @@ personal_info_df = pd.read_csv(info_path)
 
 @app.route("/predict", methods=['POST'])
 def predict():
-        """
+    """
     Prédit la probabilité d'un événement pour un échantillon basé sur un identifiant fourni.
 
     Cette fonction reçoit une requête POST avec un identifiant unique (`SK_ID_CURR`) au format JSON.
@@ -67,7 +67,7 @@ def predict():
 
 @app.route("/info", methods=['POST'])
 def info():
-        """
+    """
     Récupère les informations personnelles associées à un identifiant unique.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) au format JSON.
@@ -106,7 +106,7 @@ def info():
 
 @app.route("/distribution", methods=['POST'])
 def distribution():
-        """
+    """
     Récupère la distribution d'une caractéristique spécifique et la valeur associée à un client donné.
 
     Cette fonction reçoit une requête POST contenant un identifiant unique (`SK_ID_CURR`) et une caractéristique (`feature`) au format JSON.
